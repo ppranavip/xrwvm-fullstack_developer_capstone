@@ -58,19 +58,66 @@ app.get('/fetchReviews/dealer/:id', async (req, res) => {
 
 // Express route to fetch all dealerships
 app.get('/fetchDealers', async (req, res) => {
-//Write your code here
-});
+    const client = new MongoClient(url);
+  
+    try {
+      await client.connect();
+      const db = client.db(dbName);
+  
+      const dealers = await db.collection('dealers').find({}).toArray();
+  
+      res.json(dealers);
+    } catch (err) {
+      console.error('Error fetching dealers:', err);
+      res.status(500).send('Internal Server Error');
+    } finally {
+      await client.close();
+    }
+  });
 
 // Express route to fetch Dealers by a particular state
 app.get('/fetchDealers/:state', async (req, res) => {
-//Write your code here
-});
+    const client = new MongoClient(url);
+  
+    try {
+      await client.connect();
+      const db = client.db(dbName);
+  
+      const state = req.params.state;
+      const dealers = await db.collection('dealers').find({ state: state }).toArray();
+  
+      res.json(dealers);
+    } catch (err) {
+      console.error('Error fetching dealers by state:', err);
+      res.status(500).send('Internal Server Error');
+    } finally {
+      await client.close();
+    }
+  });
 
 // Express route to fetch dealer by a particular id
 app.get('/fetchDealer/:id', async (req, res) => {
-//Write your code here
-});
-
+    const client = new MongoClient(url);
+  
+    try {
+      await client.connect();
+      const db = client.db(dbName);
+  
+      const id = req.params.id;
+      const dealer = await db.collection('dealers').findOne({ _id: new ObjectId(id) });
+  
+      if (!dealer) {
+        return res.status(404).send('Dealer not found');
+      }
+  
+      res.json(dealer);
+    } catch (err) {
+      console.error('Error fetching dealer by ID:', err);
+      res.status(500).send('Internal Server Error');
+    } finally {
+      await client.close();
+    }
+  });
 //Express route to insert review
 app.post('/insert_review', express.raw({ type: '*/*' }), async (req, res) => {
   data = JSON.parse(req.body);
